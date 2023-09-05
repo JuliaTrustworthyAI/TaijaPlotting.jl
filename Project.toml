@@ -1,0 +1,13 @@
+name = "TaijaPlotting"
+uuid = "bd7198b4-c7d6-400c-9bab-9a24614b0240"
+authors = ["Patrick Altmeyer"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
