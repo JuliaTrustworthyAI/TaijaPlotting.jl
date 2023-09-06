@@ -1,19 +1,3 @@
-_n_neighbors(tfn::UMAP.UMAP_) = size(tfn.knns, 1)
-
-function MultivariateStats.predict(tfn::UMAP.UMAP_, X::AbstractArray)
-    n_neighbors = minimum([_n_neighbors(tfn), size(X, 2) - 1])
-    if n_neighbors == 0
-        # A simple catch in case n_samples = 1: add random sample and remove afterwards.
-        X = hcat(X, rand(size(X, 1)))
-        n_neighbors = 1
-        X = UMAP.transform(tfn, X; n_neighbors=n_neighbors)
-        X = X[:, 1]
-    else
-        X = UMAP.transform(tfn, X; n_neighbors=n_neighbors)
-    end
-    return X
-end
-
 function embed(data::CounterfactualData, X::AbstractArray=nothing; dim_red::Symbol=:pca)
 
     # Training compressor:
@@ -23,10 +7,6 @@ function embed(data::CounterfactualData, X::AbstractArray=nothing; dim_red::Symb
             tfn = data.compressor
         else
             @info "Training model to compress data."
-            if dim_red == :umap
-                n_neighbors = minimum([size(X_train, 2) - 1, 5])
-                tfn = UMAP_(X_train, 2; n_neighbors=n_neighbors)
-            end
             if dim_red == :pca
                 tfn = MultivariateStats.fit(PCA, X_train; maxoutdim=2)
             end

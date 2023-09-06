@@ -6,7 +6,6 @@ using Flux
 using MLJBase
 using MultivariateStats
 using Plots
-using UMAP
 
 
 include("CounterfactualExplations/CounterfactualExplanations.jl")
