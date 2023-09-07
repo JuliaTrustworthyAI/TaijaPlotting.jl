@@ -317,7 +317,7 @@ function Plots.bar(
     conf_model::ConformalModel, fitresult, X; label="", xtickfontsize=6, kwrgs...
 )
     ŷ = MLJBase.predict(conf_model, fitresult, X)
-    idx = size_indicator(ŷ)
+    idx = ConformalPrediction.size_indicator(ŷ)
     x = sort(levels(idx); lt=natural)
     y = [sum(idx .== _x) for _x in x]
     return Plots.bar(x, y; label=label, xtickfontsize=xtickfontsize, kwrgs...)
