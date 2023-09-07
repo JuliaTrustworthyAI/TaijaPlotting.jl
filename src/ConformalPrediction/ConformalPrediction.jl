@@ -124,7 +124,7 @@ function Plots.contourf(
     # Predictions
     Z = []
     for x2 in x2range, x1 in x1range
-        p̂ = MLJBase.MLJBase.predict(conf_model, fitresult, table([x1 x2]))[1]
+        p̂ = MLJBase.predict(conf_model, fitresult, table([x1 x2]))[1]
         if plot_set_size
             z = ismissing(p̂) ? 0 : sum(pdf.(p̂, p̂.decoder.classes) .> 0)
         elseif plot_classification_loss
