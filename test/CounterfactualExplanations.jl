@@ -2,6 +2,7 @@ using CounterfactualExplanations
 using CounterfactualExplanations.Data
 using CounterfactualExplanations.DataPreprocessing
 using CounterfactualExplanations.Models
+using Plots
 
 # Counteractual data and model:
 counterfactual_data = load_linearly_separable()
