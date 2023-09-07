@@ -124,7 +124,7 @@ function Plots.contourf(
     # Predictions
     Z = []
     for x2 in x2range, x1 in x1range
-        p̂ = predict(conf_model, fitresult, table([x1 x2]))[1]
+        p̂ = MLJBase.MLJBase.predict(conf_model, fitresult, table([x1 x2]))[1]
         if plot_set_size
             z = ismissing(p̂) ? 0 : sum(pdf.(p̂, p̂.decoder.classes) .> 0)
         elseif plot_classification_loss
@@ -222,7 +222,7 @@ function Plots.areaplot(
     end
 
     # Predictions:
-    ŷ = predict(conf_model, fitresult, Xraw)
+    ŷ = MLJBase.predict(conf_model, fitresult, Xraw)
     nout = length(levels(y))
     ŷ =
         map(_y -> ismissing(_y) ? [0 for i in 1:nout] : pdf.(_y, levels(y)), ŷ) |> _y -> reduce(hcat, _y)
@@ -291,7 +291,7 @@ function Plots.plot(
     )
 
     # Plot predictions:
-    ŷ = predict(conf_model, fitresult, Xraw)
+    ŷ = MLJBase.predict(conf_model, fitresult, Xraw)
     lb, ub = eachcol(reduce(vcat, map(y -> permutedims(collect(y)), ŷ)))
     ymid = (lb .+ ub) ./ 2
     yerror = (ub .- lb) ./ 2
@@ -316,7 +316,7 @@ A `Plots.jl` recipe/method extension that can be used to visualize the set size 
 function Plots.bar(
     conf_model::ConformalModel, fitresult, X; label="", xtickfontsize=6, kwrgs...
 )
-    ŷ = predict(conf_model, fitresult, X)
+    ŷ = MLJBase.predict(conf_model, fitresult, X)
     idx = size_indicator(ŷ)
     x = sort(levels(idx); lt=natural)
     y = [sum(idx .== _x) for _x in x]
