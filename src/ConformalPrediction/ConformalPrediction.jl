@@ -30,10 +30,10 @@ Helper function to get variables names of `X`.
 """
 function get_names(X)
     try
-        global _names = MMI.schema(X).names
+        global _names = MLJBase.schema(X).names
     catch
-        X = MMI.table(X)
-        global _names = MMI.schema(X).names
+        X = MLJBase.table(X)
+        global _names = MLJBase.schema(X).names
     end
     return _names
 end
@@ -76,7 +76,7 @@ function Plots.contourf(
 )
 
     # Setup:
-    X = permutedims(MMI.matrix(X))
+    X = permutedims(MLJBase.matrix(X))
 
     @assert size(X, 1) == 2 "Can only create contour plot for conformal classifier with exactly two input variables."
 
@@ -200,7 +200,7 @@ function Plots.areaplot(
     # Setup:
     Xraw = deepcopy(X)
     _names = get_names(Xraw)
-    X = permutedims(MMI.matrix(X))
+    X = permutedims(MLJBase.matrix(X))
 
     # Dimensions:
     if size(X, 1) > 1
@@ -261,7 +261,7 @@ function Plots.plot(
 
     Xraw = deepcopy(X)
     _names = get_names(Xraw)
-    X = permutedims(MMI.matrix(X))
+    X = permutedims(MLJBase.matrix(X))
 
     # Dimensions:
     if size(X, 1) > 1
