@@ -7,8 +7,10 @@ using MLJBase
 using MultivariateStats
 using Plots
 
-
-include("CounterfactualExplations/CounterfactualExplanations.jl")
 export animate_path
+
+include("ConformalPrediction/ConformalPrediction.jl")
+include("CounterfactualExplations/CounterfactualExplanations.jl")
+include("LaplaceRedux/LaplaceRedux.jl")
 
 end

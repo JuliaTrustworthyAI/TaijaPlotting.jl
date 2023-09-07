@@ -160,7 +160,7 @@ end
 A helper method that prepares data for plotting.
 """
 function set_up_plots(ce::CounterfactualExplanation; alpha, plot_proba, kwargs...)
-    p1 = Models.plot(ce.M, ce.data; target=ce.target, alpha=alpha, kwargs...)
+    p1 = plot(ce.M, ce.data; target=ce.target, alpha=alpha, kwargs...)
     p2 = plot(; xlims=(1, total_steps(ce) + 1), ylims=(0, 1))
     path_embedded = embed_path(ce)
     path_labels = CounterfactualExplanations.counterfactual_label_path(ce)
