@@ -4,4 +4,6 @@
 /docs/Manifest.toml
 /docs/build/
 
+*.vscode
+
 **/Manifest.toml

@@ -1,3 +1,5 @@
+using ManifoldLearning
+
 function embed(data::CounterfactualData, X::AbstractArray=nothing; dim_red::Symbol=:pca)
 
     # Training compressor:
@@ -9,8 +11,10 @@ function embed(data::CounterfactualData, X::AbstractArray=nothing; dim_red::Symb
             @info "Training model to compress data."
             if dim_red == :pca
                 tfn = MultivariateStats.fit(PCA, X_train; maxoutdim=2)
+            elseif dim_red == :tsne
+                tfn = MultivariateStats.fit(TSNE, X_train; maxoutdim=2)
             end
-            data.compressor = tfn
+            data.compressor = nothing
             X = isnothing(X) ? X_train : X
         end
     else
@@ -18,11 +22,13 @@ function embed(data::CounterfactualData, X::AbstractArray=nothing; dim_red::Symb
     end
 
     # Transforming:
+    X = typeof(X) <: Vector{<:Matrix} ? hcat(X...) : X
     if !isnothing(tfn) && !isnothing(X)
         X = MultivariateStats.predict(tfn, X)
     else
         X = isnothing(X) ? X_train : X
     end
+
     return X
 end
 

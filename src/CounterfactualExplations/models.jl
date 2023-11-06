@@ -1,3 +1,7 @@
+using DataAPI
+using Distributions: pdf
+using NearestNeighborModels: KNNClassifier
+
 function Plots.plot(
     M::AbstractFittedModel,
     data::DataPreprocessing.CounterfactualData;
@@ -43,7 +47,7 @@ function Plots.plot(
         knn1, y_train = voronoi(X, ŷ)
         predict_ =
             (X::AbstractVector) -> vec(
-                Distributions.pdf(
+                pdf(
                     MLJBase.predict(knn1, MLJBase.table(reshape(X, 1, 2))),
                     DataAPI.levels(y_train),
                 ),
@@ -87,7 +91,7 @@ function Plots.plot(
 end
 
 function voronoi(X::AbstractMatrix, y::AbstractVector)
-    knnc = NearestNeighborModels.KNNClassifier(; K=1) # KNNClassifier instantiation
+    knnc = KNNClassifier(; K=1) # KNNClassifier instantiation
     X = MLJBase.table(X)
     y = CategoricalArrays.categorical(y)
     knnc_mach = MLJBase.machine(knnc, X, y)

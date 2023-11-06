@@ -21,12 +21,17 @@ plot(ce)
 ```
 """
 function Plots.plot(
-    ce::CounterfactualExplanation;
+    ce_plot::CounterfactualExplanation;
     alpha_=0.5,
     plot_up_to::Union{Nothing,Int}=nothing,
     plot_proba::Bool=false,
+    n_points=1000,
     kwargs...
 )
+
+    ce = deepcopy(ce_plot)
+    ce.data = DataPreprocessing.subsample(ce.data, n_points)
+
     max_iter = total_steps(ce)
     max_iter = if isnothing(plot_up_to)
         total_steps(ce)
@@ -106,8 +111,8 @@ Helper function that plots a single step of the counterfactual path.
 """
 function plot_state(ce::CounterfactualExplanation, t::Int, final_sate::Bool; kwargs...)
     args = PlotIngredients(; kwargs...)
-    x1 = selectdim(args.path_embedded[t], 1, 1)
-    x2 = selectdim(args.path_embedded[t], 1, 2)
+    x1 = [args.path_embedded[1,t]]
+    x2 = [args.path_embedded[2,t]]
     y = args.path_labels[t]
     _c = CategoricalArrays.levelcode.(y)
     n_ = ce.num_counterfactuals

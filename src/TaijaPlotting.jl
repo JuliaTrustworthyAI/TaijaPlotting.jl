@@ -4,7 +4,7 @@ using CategoricalArrays
 using CounterfactualExplanations
 using Flux
 using MLJBase
-using MultivariateStats
+using MultivariateStats             
 using Plots
 
 export animate_path
