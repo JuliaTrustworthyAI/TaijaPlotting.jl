@@ -28,6 +28,7 @@ LaplaceRedux = "0.1"
 MLJBase = "0.21, 0.22"
 MultivariateStats = "0"
 NaturalSort = "1"
+NearestNeighborModels = "0.2"
 Plots = "1"
 julia = "1.7, 1.8, 1.9"
 
