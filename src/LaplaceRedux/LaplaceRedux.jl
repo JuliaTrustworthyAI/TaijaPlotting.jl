@@ -88,14 +88,14 @@ function Plots.plot(
         # Plot
         predict_ = function (X::AbstractVector)
             z = la(X; link_approx=link_approx)
-            if outdim(la) == 1 # binary
+            if LaplaceRedux.outdim(la) == 1 # binary
                 z = [1.0 - z[1], z[1]]
             end
             return z
         end
         Z = [predict_([x, y]) for x in x_range, y in y_range]
         Z = reduce(hcat, Z)
-        if outdim(la) > 1
+        if LaplaceRedux.outdim(la) > 1
             if isnothing(target)
                 @info "No target label supplied, using first."
             end
