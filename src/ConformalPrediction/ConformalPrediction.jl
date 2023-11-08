@@ -133,7 +133,7 @@ function Plots.contourf(
                 conf_model, fitresult, [x1 x2], _target; temp=temp, loss_matrix=loss_matrix
             )
         elseif plot_set_loss
-            z = ConformalPrediction.smooth_size_loss(
+            z = ConformalPrediction.ConformalTraining.smooth_size_loss(
                 conf_model, fitresult, [x1 x2]; κ=κ, temp=temp
             )
         else
