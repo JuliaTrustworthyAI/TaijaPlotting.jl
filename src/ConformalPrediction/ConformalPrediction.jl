@@ -69,7 +69,7 @@ function Plots.contourf(
     plot_set_size=false,
     plot_classification_loss=false,
     plot_set_loss=false,
-    temp=nothing,
+    temp=0.1,
     κ=0,
     loss_matrix=UniformScaling(1.0),
     kwargs...
