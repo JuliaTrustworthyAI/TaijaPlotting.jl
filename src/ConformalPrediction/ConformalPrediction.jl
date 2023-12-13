@@ -129,7 +129,7 @@ function Plots.contourf(
             z = ismissing(p̂) ? 0 : sum(pdf.(p̂, p̂.decoder.classes) .> 0)
         elseif plot_classification_loss
             _target = categorical([target]; levels=levels(y))
-            z = ConformalPrediction.classification_loss(
+            z = ConformalPrediction.ConformalTraining.classification_loss(
                 conf_model, fitresult, [x1 x2], _target; temp=temp, loss_matrix=loss_matrix
             )
         elseif plot_set_loss
