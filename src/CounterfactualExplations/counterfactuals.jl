@@ -1,3 +1,5 @@
+using MLUtils: stack
+
 """
     Plots.plot(
         ce::CounterfactualExplanation;
