@@ -1,3 +1,5 @@
+using MLUtils: stack
+
 """
     Plots.plot(
         ce::CounterfactualExplanation;
@@ -103,21 +105,21 @@ end
     plot_state(
         ce::CounterfactualExplanation,
         t::Int,
-        final_sate::Bool;
+        final_state::Bool;
         kwargs...
     )
 
 Helper function that plots a single step of the counterfactual path.
 """
-function plot_state(ce::CounterfactualExplanation, t::Int, final_sate::Bool; kwargs...)
+function plot_state(ce::CounterfactualExplanation, t::Int, final_state::Bool; kwargs...)
     args = PlotIngredients(; kwargs...)
-    x1 = [args.path_embedded[1,t]]
-    x2 = [args.path_embedded[2,t]]
+    x1 = args.path_embedded[1,t,:]
+    x2 = args.path_embedded[2,t,:]
     y = args.path_labels[t]
     _c = CategoricalArrays.levelcode.(y)
     n_ = ce.num_counterfactuals
     label_ = reshape(["C$i" for i in 1:n_], 1, n_)
-    if !final_sate
+    if !final_state
         scatter!(args.p1, x1, x2; group=y, colour=_c, ms=5, label="")
     else
         scatter!(args.p1, x1, x2; group=y, colour=_c, ms=10, label="")

@@ -4,4 +4,4 @@ using CounterfactualExplanations.Models
 
 include("data.jl")
 include("models.jl")
-include("countefactuals.jl")
+include("counterfactuals.jl")
