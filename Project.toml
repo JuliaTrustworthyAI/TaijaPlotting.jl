@@ -1,7 +1,7 @@
 name = "TaijaPlotting"
 uuid = "bd7198b4-c7d6-400c-9bab-9a24614b0240"
 authors = ["Patrick Altmeyer"]
-version = "1.0.6"
+version = "1.0.7"
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
