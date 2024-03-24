@@ -20,7 +20,7 @@ function embed(data::CounterfactualData, X::AbstractArray = nothing; dim_red::Sy
     end
 
     # Transforming:
-    X = typeof(X) <: Vector{<:Matrix} ? stack(X, dims = 2) : X
+    X = typeof(X) <: Vector{<:Matrix} ? hcat(X...) : X
     if !isnothing(tfn) && !isnothing(X)
         X = MultivariateStats.predict(tfn, X)
     else
