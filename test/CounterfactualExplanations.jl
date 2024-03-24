@@ -1,11 +1,11 @@
 using CounterfactualExplanations
-using CounterfactualExplanations.Data
 using CounterfactualExplanations.DataPreprocessing
 using CounterfactualExplanations.Models
 using Plots
+using TaijaData
 
 # Counteractual data and model:
-counterfactual_data = load_linearly_separable()
+counterfactual_data = CounterfactualData(TaijaData.load_linearly_separable()...)
 M = fit_model(counterfactual_data, :Linear)
 target = 2
 factual = 1

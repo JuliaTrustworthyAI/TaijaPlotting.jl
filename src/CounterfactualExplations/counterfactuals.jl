@@ -24,11 +24,11 @@ plot(ce)
 """
 function Plots.plot(
     ce_plot::CounterfactualExplanation;
-    alpha_=0.5,
-    plot_up_to::Union{Nothing,Int}=nothing,
-    plot_proba::Bool=false,
-    n_points=1000,
-    kwargs...
+    alpha_ = 0.5,
+    plot_up_to::Union{Nothing,Int} = nothing,
+    plot_proba::Bool = false,
+    n_points = 1000,
+    kwargs...,
 )
 
     ce = deepcopy(ce_plot)
@@ -41,9 +41,9 @@ function Plots.plot(
         minimum([plot_up_to, max_iter])
     end
     max_iter += 1
-    ingredients = set_up_plots(ce; alpha=alpha_, plot_proba=plot_proba, kwargs...)
+    ingredients = set_up_plots(ce; alpha = alpha_, plot_proba = plot_proba, kwargs...)
 
-    for t in 1:max_iter
+    for t = 1:max_iter
         final_state = t == max_iter
         plot_state(ce, t, final_state; ingredients...)
     end
@@ -74,11 +74,11 @@ animate_path(ce)
 """
 function animate_path(
     ce::CounterfactualExplanation,
-    path=tempdir();
-    alpha_=0.5,
-    plot_up_to::Union{Nothing,Int}=nothing,
-    plot_proba::Bool=false,
-    kwargs...
+    path = tempdir();
+    alpha_ = 0.5,
+    plot_up_to::Union{Nothing,Int} = nothing,
+    plot_proba::Bool = false,
+    kwargs...,
 )
     max_iter = total_steps(ce)
     max_iter = if isnothing(plot_up_to)
@@ -87,9 +87,9 @@ function animate_path(
         minimum([plot_up_to, max_iter])
     end
     max_iter += 1
-    ingredients = set_up_plots(ce; alpha=alpha_, plot_proba=plot_proba, kwargs...)
+    ingredients = set_up_plots(ce; alpha = alpha_, plot_proba = plot_proba, kwargs...)
 
-    anim = @animate for t in 1:max_iter
+    anim = @animate for t = 1:max_iter
         final_state = t == max_iter
         plot_state(ce, t, final_state; ingredients...)
         if plot_proba
@@ -113,16 +113,16 @@ Helper function that plots a single step of the counterfactual path.
 """
 function plot_state(ce::CounterfactualExplanation, t::Int, final_state::Bool; kwargs...)
     args = PlotIngredients(; kwargs...)
-    x1 = args.path_embedded[1,t,:]
-    x2 = args.path_embedded[2,t,:]
+    x1 = args.path_embedded[1, t, :]
+    x2 = args.path_embedded[2, t, :]
     y = args.path_labels[t]
     _c = CategoricalArrays.levelcode.(y)
     n_ = ce.num_counterfactuals
-    label_ = reshape(["C$i" for i in 1:n_], 1, n_)
+    label_ = reshape(["C$i" for i = 1:n_], 1, n_)
     if !final_state
-        scatter!(args.p1, x1, x2; group=y, colour=_c, ms=5, label="")
+        scatter!(args.p1, x1, x2; group = y, colour = _c, ms = 5, label = "")
     else
-        scatter!(args.p1, x1, x2; group=y, colour=_c, ms=10, label="")
+        scatter!(args.p1, x1, x2; group = y, colour = _c, ms = 10, label = "")
         if n_ > 1
             label_1 = vec([text(lab, 5) for lab in label_])
             annotate!(x1, x2, label_1)
@@ -138,9 +138,9 @@ function plot_state(ce::CounterfactualExplanation, t::Int, final_state::Bool; kw
         plot!(
             args.p2,
             probs_;
-            label=label_2,
-            color=reshape(1:n_, 1, n_),
-            title="p(y=$(ce.target))"
+            label = label_2,
+            color = reshape(1:n_, 1, n_),
+            title = "p(y=$(ce.target))",
         )
     end
 end
@@ -167,21 +167,21 @@ end
 A helper method that prepares data for plotting.
 """
 function set_up_plots(ce::CounterfactualExplanation; alpha, plot_proba, kwargs...)
-    p1 = plot(ce.M, ce.data; target=ce.target, alpha=alpha, kwargs...)
-    p2 = plot(; xlims=(1, total_steps(ce) + 1), ylims=(0, 1))
+    p1 = plot(ce.M, ce.data; target = ce.target, alpha = alpha, kwargs...)
+    p2 = plot(; xlims = (1, total_steps(ce) + 1), ylims = (0, 1))
     path_embedded = embed_path(ce)
     path_labels = CounterfactualExplanations.counterfactual_label_path(ce)
     y_levels = ce.data.y_levels
-    path_labels = map(x -> CategoricalArrays.categorical(x; levels=y_levels), path_labels)
+    path_labels = map(x -> CategoricalArrays.categorical(x; levels = y_levels), path_labels)
     path_probs = CounterfactualExplanations.target_probs_path(ce)
     output = (
-        p1=p1,
-        p2=p2,
-        path_embedded=path_embedded,
-        path_labels=path_labels,
-        path_probs=path_probs,
-        alpha=alpha,
-        plot_proba=plot_proba,
+        p1 = p1,
+        p2 = p2,
+        path_embedded = path_embedded,
+        path_labels = path_labels,
+        path_probs = path_probs,
+        alpha = alpha,
+        plot_proba = plot_proba,
     )
     return output
 end

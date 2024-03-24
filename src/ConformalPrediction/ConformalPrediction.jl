@@ -61,18 +61,18 @@ function Plots.contourf(
     fitresult,
     X,
     y;
-    target::Union{Nothing,Real}=nothing,
-    ntest=50,
-    zoom=-1,
-    xlims=nothing,
-    ylims=nothing,
-    plot_set_size=false,
-    plot_classification_loss=false,
-    plot_set_loss=false,
-    temp=0.1,
-    κ=0,
-    loss_matrix=UniformScaling(1.0),
-    kwargs...
+    target::Union{Nothing,Real} = nothing,
+    ntest = 50,
+    zoom = -1,
+    xlims = nothing,
+    ylims = nothing,
+    plot_set_size = false,
+    plot_classification_loss = false,
+    plot_set_loss = false,
+    temp = 0.1,
+    κ = 0,
+    loss_matrix = UniformScaling(1.0),
+    kwargs...,
 )
 
     # Setup:
@@ -87,8 +87,8 @@ function Plots.contourf(
     xlims, ylims = generate_lims(x1, x2, xlims, ylims, zoom)
 
     # Surface range:
-    x1range = range(xlims[1]; stop=xlims[2], length=ntest)
-    x2range = range(ylims[1]; stop=ylims[2], length=ntest)
+    x1range = range(xlims[1]; stop = xlims[2], length = ntest)
+    x2range = range(ylims[1]; stop = ylims[2], length = ntest)
 
     # Target
     if !isnothing(target)
@@ -128,16 +128,25 @@ function Plots.contourf(
         if plot_set_size
             z = ismissing(p̂) ? 0 : sum(pdf.(p̂, p̂.decoder.classes) .> 0)
         elseif plot_classification_loss
-            _target = categorical([target]; levels=levels(y))
+            _target = categorical([target]; levels = levels(y))
             z = ConformalPrediction.ConformalTraining.classification_loss(
-                conf_model, fitresult, [x1 x2], _target; temp=temp, loss_matrix=loss_matrix
+                conf_model,
+                fitresult,
+                [x1 x2],
+                _target;
+                temp = temp,
+                loss_matrix = loss_matrix,
             )
         elseif plot_set_loss
             z = ConformalPrediction.ConformalTraining.smooth_size_loss(
-                conf_model, fitresult, [x1 x2]; κ=κ, temp=temp
+                conf_model,
+                fitresult,
+                [x1 x2];
+                κ = κ,
+                temp = temp,
             )
         else
-            z = ismissing(p̂) ? [missing for i in 1:length(levels(y))] : pdf.(p̂, levels(y))
+            z = ismissing(p̂) ? [missing for i = 1:length(levels(y))] : pdf.(p̂, levels(y))
             z = replace(z, 0 => missing)
         end
         push!(Z, z)
@@ -153,30 +162,30 @@ function Plots.contourf(
             x1range,
             x2range,
             Z;
-            title=title,
-            xlims=xlims,
-            ylims=ylims,
-            c=cgrad(:blues, _n + 1; categorical=true),
-            clim=clim,
-            kwargs...
+            title = title,
+            xlims = xlims,
+            ylims = ylims,
+            c = cgrad(:blues, _n + 1; categorical = true),
+            clim = clim,
+            kwargs...,
         )
     else
         plt = contourf(
             x1range,
             x2range,
             Z;
-            title=title,
-            xlims=xlims,
-            ylims=ylims,
-            c=cgrad(:blues),
-            linewidth=0,
-            kwargs...
+            title = title,
+            xlims = xlims,
+            ylims = ylims,
+            c = cgrad(:blues),
+            linewidth = 0,
+            kwargs...,
         )
     end
 
     # Samples:
     y = typeof(y) <: CategoricalArrays.CategoricalArray ? y : Int.(y)
-    return scatter!(plt, x1, x2; group=y, kwargs...)
+    return scatter!(plt, x1, x2; group = y, kwargs...)
 end
 
 """
@@ -193,8 +202,8 @@ function Plots.areaplot(
     fitresult,
     X,
     y;
-    input_var::Union{Nothing,Int,Symbol}=nothing,
-    kwargs...
+    input_var::Union{Nothing,Int,Symbol} = nothing,
+    kwargs...,
 )
 
     # Setup:
@@ -225,7 +234,7 @@ function Plots.areaplot(
     ŷ = MLJBase.predict(conf_model, fitresult, Xraw)
     nout = length(levels(y))
     ŷ =
-        map(_y -> ismissing(_y) ? [0 for i in 1:nout] : pdf.(_y, levels(y)), ŷ) |> _y -> reduce(hcat, _y)
+        map(_y -> ismissing(_y) ? [0 for i = 1:nout] : pdf.(_y, levels(y)), ŷ) |> _y -> reduce(hcat, _y)
     ŷ = permutedims(ŷ)
 
     return areaplot(x, ŷ; kwargs...)
@@ -244,14 +253,14 @@ function Plots.plot(
     fitresult,
     X,
     y;
-    input_var::Union{Nothing,Int,Symbol}=nothing,
-    xlims::Union{Nothing,Tuple}=nothing,
-    ylims::Union{Nothing,Tuple}=nothing,
-    zoom::Real=-0.5,
-    train_lab::Union{Nothing,String}=nothing,
-    test_lab::Union{Nothing,String}=nothing,
-    ymid_lw::Int=1,
-    kwargs...
+    input_var::Union{Nothing,Int,Symbol} = nothing,
+    xlims::Union{Nothing,Tuple} = nothing,
+    ylims::Union{Nothing,Tuple} = nothing,
+    zoom::Real = -0.5,
+    train_lab::Union{Nothing,String} = nothing,
+    test_lab::Union{Nothing,String} = nothing,
+    ymid_lw::Int = 1,
+    kwargs...,
 )
 
     # Setup
@@ -287,7 +296,13 @@ function Plots.plot(
 
     # Plot training data:
     plt = scatter(
-        vec(x), vec(y); label=train_lab, xlim=xlims, ylim=ylims, title=title, kwargs...
+        vec(x),
+        vec(y);
+        label = train_lab,
+        xlim = xlims,
+        ylim = ylims,
+        title = title,
+        kwargs...,
     )
 
     # Plot predictions:
@@ -301,10 +316,10 @@ function Plots.plot(
         plt,
         xplot[_idx],
         ymid[_idx];
-        label=test_lab,
-        ribbon=(yerror, yerror),
-        lw=ymid_lw,
-        kwargs...
+        label = test_lab,
+        ribbon = (yerror, yerror),
+        lw = ymid_lw,
+        kwargs...,
     )
 end
 
@@ -314,11 +329,16 @@ end
 A `Plots.jl` recipe/method extension that can be used to visualize the set size distribution of a conformal predictor. In the regression case, prediction interval widths are stratified into discrete bins. It can be useful to plot the distribution of set sizes in order to visually asses how adaptive a conformal predictor is. For more adaptive predictors the distribution of set sizes is typically spread out more widely, which reflects that “the procedure is effectively distinguishing between easy and hard inputs”. This is desirable: when for a given sample it is difficult to make predictions, this should be reflected in the set size (or interval width in the regression case). Since ‘difficult’ lies on some spectrum that ranges from ‘very easy’ to ‘very difficult’ the set size should vary across the spectrum of ‘empty set’ to ‘all labels included’.
 """
 function Plots.bar(
-    conf_model::ConformalModel, fitresult, X; label="", xtickfontsize=6, kwrgs...
+    conf_model::ConformalModel,
+    fitresult,
+    X;
+    label = "",
+    xtickfontsize = 6,
+    kwrgs...,
 )
     ŷ = MLJBase.predict(conf_model, fitresult, X)
     idx = ConformalPrediction.size_indicator(ŷ)
-    x = sort(levels(idx); lt=natural)
+    x = sort(levels(idx); lt = natural)
     y = [sum(idx .== _x) for _x in x]
-    return Plots.bar(x, y; label=label, xtickfontsize=xtickfontsize, kwrgs...)
+    return Plots.bar(x, y; label = label, xtickfontsize = xtickfontsize, kwrgs...)
 end

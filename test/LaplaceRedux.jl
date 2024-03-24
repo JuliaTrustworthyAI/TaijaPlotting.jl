@@ -12,13 +12,10 @@ data = zip(xs, y)
 # Model:
 n_hidden = 50
 D = size(X, 1)
-nn = Chain(
-    Dense(D, n_hidden, tanh),
-    Dense(n_hidden, 1)
-)
+nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, 1))
 
 # Fit:
-la = Laplace(nn; likelihood=:regression)
+la = Laplace(nn; likelihood = :regression)
 LaplaceRedux.fit!(la, data)
 
 @testset "LaplaceRedux.jl" begin

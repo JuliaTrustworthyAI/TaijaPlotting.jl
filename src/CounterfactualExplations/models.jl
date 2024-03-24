@@ -5,18 +5,18 @@ using NearestNeighborModels: KNNClassifier
 function Plots.plot(
     M::AbstractFittedModel,
     data::DataPreprocessing.CounterfactualData;
-    target::Union{Nothing,RawTargetType}=nothing,
-    colorbar=true,
-    title="",
-    length_out=100,
-    zoom=-0.1,
-    xlims=nothing,
-    ylims=nothing,
-    linewidth=0.1,
-    alpha=1.0,
-    contour_alpha=1.0,
-    dim_red::Symbol=:pca,
-    kwargs...
+    target::Union{Nothing,RawTargetType} = nothing,
+    colorbar = true,
+    title = "",
+    length_out = 100,
+    zoom = -0.1,
+    xlims = nothing,
+    ylims = nothing,
+    linewidth = 0.1,
+    alpha = 1.0,
+    contour_alpha = 1.0,
+    dim_red::Symbol = :pca,
+    kwargs...,
 )
     X, _ = DataPreprocessing.unpack_data(data)
     ŷ = probs(M, X) # true predictions
@@ -26,7 +26,7 @@ function Plots.plot(
         ŷ = vec(ŷ)
     end
 
-    X, y, multi_dim = prepare_for_plotting(data; dim_red=dim_red)
+    X, y, multi_dim = prepare_for_plotting(data; dim_red = dim_red)
 
     # Surface range:
     zoom = zoom * maximum(abs.(X))
@@ -40,8 +40,8 @@ function Plots.plot(
     else
         ylims = ylims .+ (zoom, -zoom)
     end
-    x_range = convert.(eltype(X), range(xlims[1]; stop=xlims[2], length=length_out))
-    y_range = convert.(eltype(X), range(ylims[1]; stop=ylims[2], length=length_out))
+    x_range = convert.(eltype(X), range(xlims[1]; stop = xlims[2], length = length_out))
+    y_range = convert.(eltype(X), range(ylims[1]; stop = ylims[2], length = length_out))
 
     if multi_dim
         knn1, y_train = voronoi(X, ŷ)
@@ -77,21 +77,21 @@ function Plots.plot(
         x_range,
         y_range,
         Z[Int(target_idx), :];
-        colorbar=colorbar,
-        title=title,
-        linewidth=linewidth,
-        xlims=xlims,
-        ylims=ylims,
+        colorbar = colorbar,
+        title = title,
+        linewidth = linewidth,
+        xlims = xlims,
+        ylims = ylims,
         kwargs...,
-        alpha=contour_alpha
+        alpha = contour_alpha,
     )
 
     # Samples:
-    return Plots.scatter!(data; dim_red=dim_red, alpha=alpha, kwargs...)
+    return Plots.scatter!(data; dim_red = dim_red, alpha = alpha, kwargs...)
 end
 
 function voronoi(X::AbstractMatrix, y::AbstractVector)
-    knnc = KNNClassifier(; K=1) # KNNClassifier instantiation
+    knnc = KNNClassifier(; K = 1) # KNNClassifier instantiation
     X = MLJBase.table(X)
     y = CategoricalArrays.categorical(y)
     knnc_mach = MLJBase.machine(knnc, X, y)
