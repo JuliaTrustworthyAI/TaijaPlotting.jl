@@ -22,6 +22,7 @@ using TaijaData
 
         plot(M, counterfactual_data)
         plot(ce)
+        plot(ce; plot_proba = true, zoom = -0.1f32)
         TaijaPlotting.animate_path(ce)
     end
 
