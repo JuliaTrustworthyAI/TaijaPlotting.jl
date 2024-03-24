@@ -28,6 +28,12 @@ isplot(plt) = typeof(plt) <: Plots.Plot
         @test isplot(
             contourf(mach.model, mach.fitresult, X, y; zoom = -1, plot_set_size = true),
         )
+        @test isplot(
+            contourf(mach.model, mach.fitresult, X, y; zoom=-1, plot_set_loss=true),
+        )
+        @test isplot(
+            contourf(mach.model, mach.fitresult, X, y; zoom=-1, plot_classification_loss=true),
+        )
         @test isplot(contourf(mach.model, mach.fitresult, X, y; target = 1))
 
     end
