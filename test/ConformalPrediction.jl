@@ -59,6 +59,22 @@ isplot(plt) = typeof(plt) <: Plots.Plot
             ),
         )
         @test isplot(plot(mach.model, mach.fitresult, X, y; input_var = :x1))
+        @test isplot(
+            plot(mach.model, mach.fitresult, X, y; target = 1, plot_set_size = true),
+        )
+        @test isplot(
+            plot(mach.model, mach.fitresult, X, y; target = 1, plot_set_loss = true),
+        )
+        @test isplot(
+            plot(
+                mach.model,
+                mach.fitresult,
+                X,
+                y;
+                target = 1,
+                plot_classification_loss = true,
+            ),
+        )
         @test isplot(bar(mach.model, mach.fitresult, X))
     end
 

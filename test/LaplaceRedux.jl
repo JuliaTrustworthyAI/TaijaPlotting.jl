@@ -1,6 +1,7 @@
 using Flux
 using LaplaceRedux
 using LaplaceRedux.Data: toy_data_regression
+using OneHotArrays
 using Plots
 using TaijaData
 
