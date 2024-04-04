@@ -1,3 +1,5 @@
+using MLUtils
+
 function embed(data::CounterfactualData, X::AbstractArray = nothing; dim_red::Symbol = :pca)
 
     # Training compressor:
@@ -20,9 +22,9 @@ function embed(data::CounterfactualData, X::AbstractArray = nothing; dim_red::Sy
     end
 
     # Transforming:
-    X = typeof(X) <: Vector{<:Matrix} ? hcat(X...) : X
+    X = typeof(X) <: Vector{<:Matrix} ? MLUtils.stack(X, dims=2) : X
     if !isnothing(tfn) && !isnothing(X)
-        X = MultivariateStats.predict(tfn, X)
+        X = mapslices(x -> MultivariateStats.predict(tfn, x), X, dims = 1)
     else
         X = isnothing(X) ? X_train : X
     end

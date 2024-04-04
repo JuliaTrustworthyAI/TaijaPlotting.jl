@@ -24,6 +24,15 @@ using TaijaData
         plot(ce)
         plot(ce; plot_proba = true, zoom = -0.1f32)
         TaijaPlotting.animate_path(ce)
+
+        @test true
+
+        @testset "Multiple counterfactuals" begin
+            ce = generate_counterfactual(x, target, counterfactual_data, M, generator; num_counterfactuals = 5)
+            plot(ce)
+            @test true
+        end
+
     end
 
     @testset "Multi-dim" begin
@@ -43,6 +52,8 @@ using TaijaData
         plot(M, counterfactual_data)
         plot(ce)
         TaijaPlotting.animate_path(ce)
+
+        @test true
     end
 
     @test true
