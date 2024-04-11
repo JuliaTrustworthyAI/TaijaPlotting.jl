@@ -16,6 +16,8 @@ function Plots.plot(
     alpha = 1.0,
     contour_alpha = 1.0,
     dim_red::Symbol = :pca,
+    plot_loss::Bool = false,
+    loss_fun::Union{Nothing,Function} = nothing,
     kwargs...,
 )
     X, _ = DataPreprocessing.unpack_data(data)
@@ -25,6 +27,13 @@ function Plots.plot(
     else
         ŷ = vec(ŷ)
     end
+
+    # Target:
+    if isnothing(target)
+        target = data.y_levels[1]
+        @info "No target label supplied, using first."
+    end
+    target_encoded = data.output_encoder(target)
 
     X, y, multi_dim = prepare_for_plotting(data; dim_red = dim_red)
 
@@ -43,40 +52,43 @@ function Plots.plot(
     x_range = convert.(eltype(X), range(xlims[1]; stop = xlims[2], length = length_out))
     y_range = convert.(eltype(X), range(ylims[1]; stop = ylims[2], length = length_out))
 
-    if multi_dim
-        knn1, y_train = voronoi(X, ŷ)
-        predict_ =
-            (X::AbstractVector) -> vec(
-                pdf(
-                    MLJBase.predict(knn1, MLJBase.table(reshape(X, 1, 2))),
-                    DataAPI.levels(y_train),
-                ),
-            )
-        Z = [predict_([x, y]) for x in x_range, y in y_range]
+    plot_loss = plot_loss || !isnothing(loss_fun)
+
+    if plot_loss 
+        # Loss surface:
+        Z = [loss_fun(logits(M, [x, y][:, :]), target_encoded) for x in x_range, y in y_range]
     else
-        predict_ = function (X::AbstractVector)
-            X = permutedims(permutedims(X))
-            z = predict_proba(M, data, X)
-            return z
+        # Prediction surface:
+        if multi_dim
+            knn1, y_train = voronoi(X, ŷ)
+            predict_ =
+                (X::AbstractVector) -> vec(
+                    pdf(
+                        MLJBase.predict(knn1, MLJBase.table(reshape(X, 1, 2))),
+                        DataAPI.levels(y_train),
+                    ),
+                )
+            Z = [predict_([x, y]) for x in x_range, y in y_range]
+        else
+            predict_ = function (X::AbstractVector)
+                X = permutedims(permutedims(X))
+                z = predict_proba(M, data, X)
+                return z
+            end
+            Z = [predict_([x, y]) for x in x_range, y in y_range]
         end
-        Z = [predict_([x, y]) for x in x_range, y in y_range]
     end
 
     # Pre-processes:
     Z = reduce(hcat, Z)
-    if isnothing(target)
-        target = data.y_levels[1]
-        if size(Z, 1) > 2
-            @info "No target label supplied, using first."
-        end
-    end
     target_idx = get_target_index(data.y_levels, target)
+    z = plot_loss ? Z[1, :] : Z[target_idx, :]
 
     # Contour:
     Plots.contourf(
         x_range,
         y_range,
-        Z[Int(target_idx), :];
+        z;
         colorbar = colorbar,
         title = title,
         linewidth = linewidth,
