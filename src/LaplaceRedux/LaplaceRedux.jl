@@ -57,7 +57,7 @@ function Plots.plot(
         fμ, fvar = la(_x)
         fμ = vec(fμ)
         fσ = vec(sqrt.(fvar))
-        pred_std = sqrt.(fσ .^ 2 .+ la.σ^2)
+        pred_std = sqrt.(fσ .^ 2 .+ la.prior.σ^2)
         plot!(
             x_range,
             fμ;
