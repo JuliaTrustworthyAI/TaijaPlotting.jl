@@ -21,7 +21,7 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 CategoricalArrays = "0.10"
-ConformalPrediction = "0.1, 1"
+ConformalPrediction = "0.1, 0.1.12, 1"
 CounterfactualExplanations = "0.1, 1"
 DataAPI = "1"
 Distributions = "0.25"
