@@ -3,22 +3,22 @@ using MLUtils
 function embed(data::CounterfactualData, X::AbstractArray = nothing; dim_red::Symbol = :pca)
 
     # Training compressor:
-    if isnothing(data.compressor)
+    if typeof(data.input_encoder) <: MultivariateStats.AbstractDimensionalityReduction
+        tfn = data.input_encoder
+    else
         X_train, _ = DataPreprocessing.unpack_data(data)
         if size(X_train, 1) < 3
-            tfn = data.compressor
+            tfn = nothing
         else
             @info "Training model to compress data."
             if dim_red == :pca
-                tfn = MultivariateStats.fit(PCA, X_train; maxoutdim = 2)
+                tfn = MultivariateStats.fit(PCA, X_train; maxoutdim=2)
             elseif dim_red == :tsne
-                tfn = MultivariateStats.fit(TSNE, X_train; maxoutdim = 2)
+                tfn = MultivariateStats.fit(TSNE, X_train; maxoutdim=2)
             end
-            data.compressor = nothing
+            data.input_encoder = nothing
             X = isnothing(X) ? X_train : X
         end
-    else
-        tfn = data.compressor
     end
 
     # Transforming:
