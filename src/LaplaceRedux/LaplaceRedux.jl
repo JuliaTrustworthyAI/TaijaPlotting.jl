@@ -1,4 +1,5 @@
 using LaplaceRedux
+using Trapz
 
 function Plots.plot(
     la::Laplace,
@@ -121,4 +122,48 @@ function Plots.plot(
         # Samples:
         scatter!(X[1, :], X[2, :]; group = Int.(y), color = Int.(y), kwargs...)
     end
+end
+
+
+
+
+const quantiles= collect(0:0.05:1)
+
+"""
+'Calibration_Plot_Regression(y_val, samp_distr)'
+
+This plot displays the true frequency of points in each confidence interval relative to the predicted fraction of points in that interval.
+The intervals are taken in step of 0.05 quantiles.
+
+Input: 
+-Y_val: a vector of  true values y_t
+-samp_distr: an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
+"""
+function Calibration_Plot_Regression(y_val, samp_distr)
+    quantiles= collect(0:0.05:1)
+    # Compute the counts
+    emp_freq = empirical_freq(y_val, samp_distr)
+    # Create a new plot object
+    p = plot()
+
+    plot!(p, quantiles, emp_freq, fillrange = quantiles, color = :lightblue)
+
+    plot!(p,[0, 1], [0, 1], color=:orange, linestyle=:dash, label="")
+
+    plot!(p, quantiles , emp_freq, color=:blue, label="")
+    # Calculate the area under the curve and subtract the area under the diagonal line
+
+
+    area= trapz((quantiles),vec(abs.(emp_freq-quantiles)))
+
+    # Add labels and title
+    xlabel!("Predicted proportion in interval")
+    ylabel!("Observed proportion in interval")
+    title!("Average calibration")
+    xlims!(0, 1)
+    ylims!(0, 1)
+    annotate!(0.75,0.05,("Miscalibration area = $(round(area, digits=2))",8,11,:bottom))
+
+    # Show the plot
+    display(p)
 end

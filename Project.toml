@@ -18,6 +18,7 @@ MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
 NaturalSort = "c020b1a1-e9b0-503a-9c33-f039bfc54a85"
 NearestNeighborModels = "636a865e-7cf4-491e-846c-de09b730eb36"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 
 [compat]
 CategoricalArrays = "0.10"
