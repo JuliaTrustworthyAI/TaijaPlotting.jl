@@ -130,19 +130,19 @@ end
 const quantiles= collect(0:0.05:1)
 
 """
-'Calibration_Plot_Regression(y_val, samp_distr)'
+'Calibration_Plot_Regression(y_cal, samp_distr)'
 
 This plot displays the true frequency of points in each confidence interval relative to the predicted fraction of points in that interval.
 The intervals are taken in step of 0.05 quantiles.
 
 Input: 
--Y_val: a vector of  true values y_t
+-Y_cal: a vector of  true values y_t
 -samp_distr: an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
 """
-function Calibration_Plot_Regression(y_val, samp_distr)
+function Calibration_Plot_Regression(y_cal, samp_distr)
     quantiles= collect(0:0.05:1)
     # Compute the counts
-    emp_freq = empirical_freq(y_val, samp_distr)
+    emp_freq = empirical_freq(y_cal, samp_distr)
     # Create a new plot object
     p = plot()
 
