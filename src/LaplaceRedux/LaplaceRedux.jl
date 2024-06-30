@@ -139,10 +139,16 @@ Input:
 -Y_cal: a vector of  true values y_t
 -samp_distr: an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
 """
-function Calibration_Plot_Regression(y_cal, samp_distr)
-    quantiles= collect(0:0.05:1)
-    # Compute the counts
-    emp_freq = empirical_freq(y_cal, samp_distr)
+function Calibration_Plot(la::Laplace, y_cal, samp_distr, n_bins)
+    quantiles = collect(range(0; stop=1, length=n_bins + 1))
+    # Compute the empirical frequency
+    if la.likelihood == :regression
+        emp_freq = empirical_frequency_regression(y_cal, samp_distr, n_bins)
+    elseif  la.likelihood == :classification
+        emp_freq = empirical_frequency_binary_classification(y_cal, samp_distr, n_bins)
+    end
+
+
     # Create a new plot object
     p = plot()
 
@@ -151,10 +157,9 @@ function Calibration_Plot_Regression(y_cal, samp_distr)
     plot!(p,[0, 1], [0, 1], color=:orange, linestyle=:dash, label="")
 
     plot!(p, quantiles , emp_freq, color=:blue, label="")
-    # Calculate the area under the curve and subtract the area under the diagonal line
+    # Calculate the area between the curve and the diagonal
 
-
-    area= trapz((quantiles),vec(abs.(emp_freq-quantiles)))
+    #area= trapz((quantiles),vec(abs.(emp_freq-quantiles)))
 
     # Add labels and title
     xlabel!("Predicted proportion in interval")
