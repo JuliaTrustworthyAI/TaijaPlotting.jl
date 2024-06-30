@@ -124,50 +124,47 @@ function Plots.plot(
     end
 end
 
-
-
-
-const quantiles= collect(0:0.05:1)
-
 """
-'Calibration_Plot_Regression(y_cal, samp_distr)'
+'Calibration_Plot_Regression(y_cal, samp_distr, n_bins)'
 
 This plot displays the true frequency of points in each confidence interval relative to the predicted fraction of points in that interval.
 The intervals are taken in step of 0.05 quantiles.
 
 Input: 
--Y_cal: a vector of  true values y_t
--samp_distr: an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
+-'la::Laplace': the laplace model to use.
+-'Y_cal': a vector of  true values y_t.
+-'samp_distr': an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
+-'n_bins': numbers of bins to use.
 """
-function Calibration_Plot(la::Laplace, y_cal, samp_distr, n_bins)
-    quantiles = collect(range(0; stop=1, length=n_bins + 1))
+function Calibration_Plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
+    quantiles = collect(range(0; stop = 1, length = n_bins + 1))
+    # Create a new plot object
+    p = plot()
+    plot!([0, 1], [0, 1], label = "Perfect calibration", linestyle = :dash, color = :black)
     # Compute the empirical frequency
     if la.likelihood == :regression
         emp_freq = empirical_frequency_regression(y_cal, samp_distr, n_bins)
-    elseif  la.likelihood == :classification
-        emp_freq = empirical_frequency_binary_classification(y_cal, samp_distr, n_bins)
+        plot!(p, quantiles, emp_freq, color = :blue, label = "")
+        plot!(p, quantiles, emp_freq, fillrange = quantiles, color = :lightblue)
+        # Calculate the area between the curve and the diagonal
+        area = trapz((quantiles), vec(abs.(emp_freq - quantiles)))
+        annotate!(
+            0.75,
+            0.05,
+            ("Miscalibration area = $(round(area, digits=2))", 8, 11, :bottom),
+        )
+    elseif la.likelihood == :classification
+        num_p_per_interval, emp_freq, bin_centers =
+            empirical_frequency_binary_classification(y_cal, samp_distr, n_bins)
+        plot!(bin_centers, emp_freq, label = "Observed average", lw = 2)
     end
 
-
-    # Create a new plot object
-    p = plot()
-
-    plot!(p, quantiles, emp_freq, fillrange = quantiles, color = :lightblue)
-
-    plot!(p,[0, 1], [0, 1], color=:orange, linestyle=:dash, label="")
-
-    plot!(p, quantiles , emp_freq, color=:blue, label="")
-    # Calculate the area between the curve and the diagonal
-
-    #area= trapz((quantiles),vec(abs.(emp_freq-quantiles)))
-
     # Add labels and title
+    title!("Calibration Curve")
     xlabel!("Predicted proportion in interval")
     ylabel!("Observed proportion in interval")
-    title!("Average calibration")
     xlims!(0, 1)
     ylims!(0, 1)
-    annotate!(0.75,0.05,("Miscalibration area = $(round(area, digits=2))",8,11,:bottom))
 
     # Show the plot
     display(p)
