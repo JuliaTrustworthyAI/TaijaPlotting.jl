@@ -55,7 +55,7 @@ function Plots.plot(
             kwargs...,
         )
         _x = collect(x_range)[:, :]'
-        normal_distr, fμ, fvar = LaplaceRedux.predict(la,_x)
+        normal_distr, fμ, fvar = LaplaceRedux.glm_predictive_distribution(la,_x)
         fμ = vec(fμ)
         fσ = vec(sqrt.(fvar))
         pred_std = sqrt.(fσ .^ 2 .+ la.prior.σ^2)
