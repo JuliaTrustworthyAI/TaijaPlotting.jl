@@ -143,7 +143,7 @@ function Calibration_Plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
     plot!([0, 1], [0, 1], label = "Perfect calibration", linestyle = :dash, color = :black)
     # Compute the empirical frequency
     if la.likelihood == :regression
-        emp_freq = empirical_frequency_regression(y_cal, samp_distr, n_bins)
+        emp_freq = empirical_frequency_regression(y_cal, samp_distr; n_bins)
         plot!(p, quantiles, emp_freq, color = :blue, label = "")
         plot!(p, quantiles, emp_freq, fillrange = quantiles, color = :lightblue)
         # Calculate the area between the curve and the diagonal
