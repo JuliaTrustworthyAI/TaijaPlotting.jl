@@ -55,7 +55,7 @@ function Plots.plot(
             kwargs...,
         )
         _x = collect(x_range)[:, :]'
-        normal_distr, fμ, fvar = LaplaceRedux.glm_predictive_distribution(la,_x)
+        normal_distr, fμ, fvar = LaplaceRedux.glm_predictive_distribution(la, _x)
         fμ = vec(fμ)
         fσ = vec(sqrt.(fvar))
         pred_std = sqrt.(fσ .^ 2 .+ la.prior.σ^2)
@@ -144,8 +144,15 @@ function Calibration_Plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
     # Compute the empirical frequency
     if la.likelihood == :regression
         emp_freq = empirical_frequency_regression(y_cal, samp_distr; n_bins)
-        plot!(p, quantiles, emp_freq, color = :blue, label = "")
-        plot!(p, quantiles, emp_freq, fillrange = quantiles, color = :lightblue)
+        plot!(p, quantiles, emp_freq, color = :blue, label = "neural network")
+        plot!(
+            p,
+            quantiles,
+            emp_freq,
+            fillrange = quantiles,
+            color = :lightblue,
+            label = "miscalibration area",
+        )
         # Calculate the area between the curve and the diagonal
         area = trapz((quantiles), vec(abs.(emp_freq - quantiles)))
         annotate!(
@@ -155,7 +162,7 @@ function Calibration_Plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
         )
     elseif la.likelihood == :classification
         num_p_per_interval, emp_freq, bin_centers =
-            empirical_frequency_binary_classification(y_cal, samp_distr, n_bins)
+            empirical_frequency_binary_classification(y_cal, samp_distr; n_bins)
         plot!(bin_centers, emp_freq, label = "Observed average", lw = 2)
     end
 
