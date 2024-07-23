@@ -88,7 +88,7 @@ function Plots.plot(
 
         # Plot
         predict_ = function (X::AbstractVector)
-            z = la(X; link_approx = link_approx)
+            z = LaplaceRedux.predict(la,X; link_approx = link_approx)
             if LaplaceRedux.outdim(la) == 1 # binary
                 z = [1.0 - z[1], z[1]]
             end
