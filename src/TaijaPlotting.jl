@@ -12,5 +12,6 @@ export animate_path
 include("ConformalPrediction/ConformalPrediction.jl")
 include("CounterfactualExplations/CounterfactualExplanations.jl")
 include("LaplaceRedux/LaplaceRedux.jl")
+export Calibration_Plot
 
 end

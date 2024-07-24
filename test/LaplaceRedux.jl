@@ -22,7 +22,7 @@ using TaijaData
         nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, 1))
 
         # Fit:
-        la = Laplace(nn; likelihood = :regression)
+        la = LaplaceRedux.Laplace(nn; likelihood = :regression)
         LaplaceRedux.fit!(la, data)
 
         plot(la, X, y)
@@ -43,7 +43,7 @@ using TaijaData
             nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, 1, σ))
 
             # Fit:
-            la = Laplace(nn; likelihood = :classification)
+            la = LaplaceRedux.Laplace(nn; likelihood = :classification)
             LaplaceRedux.fit!(la, data)
 
             # Very minimal testing for basic functionality:
@@ -66,7 +66,7 @@ using TaijaData
             nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, nout, σ))
 
             # Fit:
-            la = Laplace(nn; likelihood = :classification)
+            la = LaplaceRedux.Laplace(nn; likelihood = :classification)
             LaplaceRedux.fit!(la, data)
 
             # Very minimal testing for basic functionality:

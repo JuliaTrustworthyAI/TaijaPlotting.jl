@@ -1,4 +1,5 @@
 using LaplaceRedux
+using Trapz
 
 function Plots.plot(
     la::Laplace,
@@ -54,7 +55,7 @@ function Plots.plot(
             kwargs...,
         )
         _x = collect(x_range)[:, :]'
-        fμ, fvar = la(_x)
+        normal_distr, fμ, fvar = LaplaceRedux.glm_predictive_distribution(la, _x)
         fμ = vec(fμ)
         fσ = vec(sqrt.(fvar))
         pred_std = sqrt.(fσ .^ 2 .+ la.prior.σ^2)
@@ -87,7 +88,7 @@ function Plots.plot(
 
         # Plot
         predict_ = function (X::AbstractVector)
-            z = la(X; link_approx = link_approx)
+            z = LaplaceRedux.predict(la,X; link_approx = link_approx)
             if LaplaceRedux.outdim(la) == 1 # binary
                 z = [1.0 - z[1], z[1]]
             end
@@ -121,4 +122,57 @@ function Plots.plot(
         # Samples:
         scatter!(X[1, :], X[2, :]; group = Int.(y), color = Int.(y), kwargs...)
     end
+end
+
+"""
+'Calibration_Plot_Regression(y_cal, samp_distr, n_bins)'
+
+This plot displays the true frequency of points in each confidence interval relative to the predicted fraction of points in that interval.
+The intervals are taken in step of 0.05 quantiles.
+
+Input: 
+-'la::Laplace': the laplace model to use.
+-'Y_cal': a vector of  true values y_t.
+-'samp_distr': an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
+-'n_bins': numbers of bins to use.
+"""
+function Calibration_Plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
+    quantiles = collect(range(0; stop = 1, length = n_bins + 1))
+    # Create a new plot object
+    p = plot()
+    plot!([0, 1], [0, 1], label = "Perfect calibration", linestyle = :dash, color = :black)
+    # Compute the empirical frequency
+    if la.likelihood == :regression
+        emp_freq = empirical_frequency_regression(y_cal, samp_distr; n_bins)
+        plot!(p, quantiles, emp_freq, color = :blue, label = "neural network")
+        plot!(
+            p,
+            quantiles,
+            emp_freq,
+            fillrange = quantiles,
+            color = :lightblue,
+            label = "miscalibration area",
+        )
+        # Calculate the area between the curve and the diagonal
+        area = trapz((quantiles), vec(abs.(emp_freq - quantiles)))
+        annotate!(
+            0.75,
+            0.05,
+            ("Miscalibration area = $(round(area, digits=2))", 8, 11, :bottom),
+        )
+    elseif la.likelihood == :classification
+        num_p_per_interval, emp_freq, bin_centers =
+            empirical_frequency_binary_classification(y_cal, samp_distr; n_bins)
+        plot!(bin_centers, emp_freq, label = "Observed average", lw = 2)
+    end
+
+    # Add labels and title
+    title!("Calibration Curve")
+    xlabel!("Predicted proportion in interval")
+    ylabel!("Observed proportion in interval")
+    xlims!(0, 1)
+    ylims!(0, 1)
+
+    # Show the plot
+    display(p)
 end
