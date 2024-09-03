@@ -2,8 +2,6 @@ using DataAPI
 using Distributions: pdf
 using NearestNeighborModels: KNNClassifier
 
-
-
 @recipe function f(
     M::AbstractFittedModel,
     data::CounterfactualData; 
@@ -84,21 +82,20 @@ using NearestNeighborModels: KNNClassifier
     target_idx = get_target_index(data.y_levels, target)
     z = plot_loss ? Z[1, :] : Z[target_idx, :]
 
-    return x_range, y_range, z
+    @series begin
+        seriestype := :contourf
+        colorbar := :none
+        x_range, y_range, z
+    end
+
+    _c = Int.(y.refs)
+    @series begin
+        seriestype := :scatter
+        group := y
+        markercolor := _c
+        X[:,1], X[:,2]
+    end
     
-end
-
-@userplot struct ModelPlot{T<:Tuple{AbstractModel,CounterfactualData}}
-    args::T
-end
-
-@recipe function f(mp::ModelPlot)
-    model = mp.args[1]
-    data = mp.args[2]
-    plt = contourf(model, data)
-    scatter!(data)
-    display(plt)
-    return nothing
 end
 
 
