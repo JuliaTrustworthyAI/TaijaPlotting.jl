@@ -125,7 +125,7 @@ function Plots.plot(
 end
 
 """
-'Calibration_Plot_Regression(y_cal, samp_distr, n_bins)'
+    calibration_plot(y_cal, samp_distr, n_bins)
 
 This plot displays the true frequency of points in each confidence interval relative to the predicted fraction of points in that interval.
 The intervals are taken in step of 0.05 quantiles.
@@ -136,7 +136,7 @@ Input:
 -'samp_distr': an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
 -'n_bins': numbers of bins to use.
 """
-function Calibration_Plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
+function calibration_plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
     quantiles = collect(range(0; stop = 1, length = n_bins + 1))
     # Create a new plot object
     p = plot()

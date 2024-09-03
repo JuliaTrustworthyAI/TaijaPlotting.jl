@@ -53,8 +53,14 @@ function prepare_for_plotting(data::CounterfactualData; dim_red::Symbol = :pca)
     return X', y, multi_dim
 end
 
-function Plots.scatter!(data::CounterfactualData; dim_red::Symbol = :pca, kwargs...)
+@recipe function f(data::CounterfactualData; dim_red=:pca)
+
+    # Set up:
     X, y, _ = prepare_for_plotting(data; dim_red = dim_red)
     _c = Int.(y.refs)
-    return Plots.scatter!(X[:, 1], X[:, 2]; group = y, colour = _c, kwargs...)
+    group := y
+    markercolor := _c
+
+    # return data
+    return X[:, 1], X[:, 2]
 end
