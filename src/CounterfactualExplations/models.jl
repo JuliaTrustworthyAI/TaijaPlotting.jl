@@ -2,7 +2,21 @@ using DataAPI
 using Distributions: pdf
 using NearestNeighborModels: KNNClassifier
 
-@recipe function f(
+"""
+    function plot(
+        M::AbstractFittedModel,
+        data::CounterfactualData;
+        target = nothing,
+        length_out = 100,
+        zoom = -0.1,
+        dim_red = :pca,
+        plot_loss = false,
+        loss_fun = nothing,
+    )
+
+Calling `Plots.plot` on a `AbstractFittedModel` will plot the model's predictions as a contour. The `target` argument can be used to plot the predictions for a specific target variable. The `length_out` argument can be used to control the number of points used to plot the contour. The `zoom` argument can be used to control the zoom of the plot. The `dim_red` argument can be used to control the method used to reduce the dimensionality of the data if it has more than two features. 
+"""
+@recipe function plot(
     M::AbstractFittedModel,
     data::CounterfactualData;
     target = nothing,

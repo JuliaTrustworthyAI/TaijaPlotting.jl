@@ -1,4 +1,19 @@
-@recipe function f(
+"""
+    plot(
+        ce::CounterfactualExplanation;
+        target=nothing,
+        length_out=100,
+        zoom=-0.1,
+        dim_red=:pca,
+        plot_loss=false,
+        loss_fun=nothing,
+        plot_up_to = nothing,
+        n_points = nothing,
+    )
+
+Calling `Plots.plot` on a `CounterfactualExplanation` object will plot the training data (scatters), model predictions for the specified `target` (contour) and the counterfactual path (scatter).
+"""
+@recipe function plot(
     ce::CounterfactualExplanation;
     target=nothing,
     length_out=100,
@@ -6,7 +21,7 @@
     dim_red=:pca,
     plot_loss=false,
     loss_fun=nothing,
-    plot_up_to::Union{Nothing,Int} = nothing,
+    plot_up_to = nothing,
     n_points = nothing,
 )
 

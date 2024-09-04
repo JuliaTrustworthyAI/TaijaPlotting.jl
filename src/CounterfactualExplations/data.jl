@@ -53,7 +53,12 @@ function prepare_for_plotting(data::CounterfactualData; dim_red::Symbol = :pca)
     return X', y, multi_dim
 end
 
-@recipe function f(data::CounterfactualData; dim_red = :pca)
+"""
+    plot(data::CounterfactualData; dim_red = :pca)
+
+Calling `Plots.plot` on a `data::CounterfactualData` object will generate a scatter plot of the data.
+"""
+@recipe function plot(data::CounterfactualData; dim_red = :pca)
 
     # Set up:
     X, y, _ = prepare_for_plotting(data; dim_red = dim_red)

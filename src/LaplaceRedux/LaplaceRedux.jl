@@ -1,12 +1,25 @@
 using LaplaceRedux
 using Trapz
 
-@recipe function f(
+"""
+    plot(
+        la::Laplace,
+        X::AbstractArray,
+        y::AbstractArray;
+        link_approx=:probit,
+        target=nothing,
+        length_out=50,
+        zoom=-1,
+    )
+
+Calling `Plots.plot` on a `Laplace` object will plot the posterior predictive distribution and the training data.
+"""
+@recipe function plot(
     la::Laplace,
     X::AbstractArray,
     y::AbstractArray;
-    link_approx::Symbol=:probit,
-    target::Union{Nothing,Real}=nothing,
+    link_approx=:probit,
+    target=nothing,
     length_out=50,
     zoom=-1,
 )
@@ -158,11 +171,12 @@ end
 This plot displays the true frequency of points in each confidence interval relative to the predicted fraction of points in that interval.
 The intervals are taken in step of 0.05 quantiles.
 
-Input: 
--'la::Laplace': the laplace model to use.
--'Y_cal': a vector of  true values y_t.
--'samp_distr': an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
--'n_bins': numbers of bins to use.
+## Inputs
+
+- `la::Laplace` -- the laplace model to use.
+- `Y_cal` -- a vector of  true values y_t.
+- `samp_distr` -- an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
+- `n_bins` -- numbers of bins to use.
 """
 function calibration_plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
     quantiles = collect(range(0; stop = 1, length = n_bins + 1))

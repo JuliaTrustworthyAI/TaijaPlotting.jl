@@ -1,4 +1,18 @@
-@recipe function f(
+"""
+    plot(
+        conf_model::ConformalInterval,
+        fitresult,
+        X,
+        y;
+        input_var=nothing,
+        zoom=-0.5,
+        train_lab=nothing,
+        test_lab=nothing,
+    )
+
+A `Plots.jl` recipe that can be used to visualize the conformal predictions of a fitted conformal regressor. Data (`X`,`y`) are plotted as dots and overlaid with predictions intervals. `y` is plotted on the vertical axis against a single variable `X` on the horizontal axis. A shaded area indicates the prediction interval. The line in the center of the interval is the midpoint of the interval and can be interpreted as the point estimate of the conformal regressor. In case `X` is multi-dimensional, `input_var` can be used to specify the input variable of interest that will be used for the horizontal axis. If unspecified, the first variable will be plotting by default.
+"""
+@recipe function plot(
     conf_model::ConformalInterval,
     fitresult,
     X,

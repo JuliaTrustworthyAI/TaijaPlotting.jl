@@ -1,4 +1,41 @@
-@recipe function f(
+@doc raw"""
+    plot(
+        conf_model::ConformalProbabilisticSet,
+        fitresult,
+        X,
+        y;
+        input_var=nothing,
+        target=nothing,
+        ntest=50,
+        zoom=-1,
+        plot_set_size=false,
+        plot_classification_loss=false,
+        plot_set_loss=false,
+        temp=0.1,
+        κ=0,
+        loss_matrix=UniformScaling(1.0),
+    )
+
+A `Plots.jl` recipe that can be used to visualize the conformal predictions of a fitted conformal classifier.
+
+## Two Dimensional Inputs
+
+Data (`X`,`y`) are plotted as dots and overlaid with predictions sets. `y` is used to indicate the ground-truth labels of samples by colour. Samples are visualized in a two-dimensional feature space, so it is expected that `X` ``\in \mathcal{R}^2``. By default, a contour is used to visualize the softmax output of the conformal classifier for the target label, where `target` indicates can be used to define the index of the target label. Transparent regions indicate that the prediction set does not include the `target` label. 
+
+### Target
+
+In the binary case, `target` defaults to `2`, indexing the second label: assuming the labels are `[0,1]` then the softmax output for `1` is shown. In the multi-class cases, `target` defaults to the first class: for example, if the labels are `["🐶", "🐱", "🐭"]` (in that order) then the contour indicates the softmax output for `"🐶"`.
+
+### Set Size
+
+If `plot_set_size` is set to `true`, then the contour instead visualises the the set size.
+
+## Univariate and Higher Dimensional Inputs
+
+In the case of univariate inputs or higher dimensional inputs, a stacked area plot is created: in particular, this method plots the softmax output(s) contained the the conformal predictions set on the vertical axis against an input variable `X` on the horizontal axis. In the case of multiple input variables, the `input_var` argument can be used to specify the desired input variable.
+
+"""
+@recipe function plot(
     conf_model::ConformalProbabilisticSet,
     fitresult,
     X,
@@ -71,7 +108,7 @@
             end
         end
 
-    elseif size(permutedims(MLJBase.matrix(X)), 1) == 2
+    else
 
         # CONTOUR PLOT FOR 2D
 
