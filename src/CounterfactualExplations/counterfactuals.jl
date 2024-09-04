@@ -9,7 +9,6 @@ using MLUtils: stack
     plot_loss=false,
     loss_fun=nothing,
     plot_up_to::Union{Nothing,Int} = nothing,
-    plot_proba::Bool = false,
     n_points = 1000,
 )
 
@@ -22,6 +21,9 @@ using MLUtils: stack
     # Get user-defined arguments:
     xlims = get(plotattributes, :xlims, nothing)
     ylims = get(plotattributes, :ylims, nothing)
+    ms = get(plotattributes, :markersize, 3)
+    mspath = ms*2
+    msfinal = mspath*2
 
     # Plot attributes
     linewidth --> 0.1
@@ -53,13 +55,12 @@ using MLUtils: stack
         @series begin
             seriestype := :scatter
             markercolor := i
+            markersize := ms
             group_idx = findall(y .== x)
             label --> "$(x)"
             X[group_idx, 1], X[group_idx, 2]
         end
     end
-
-    alpha = get(plotattributes, :alpha, 0.5)
 
     max_iter = total_steps(ce)
     max_iter = if isnothing(plot_up_to)
@@ -68,76 +69,26 @@ using MLUtils: stack
         minimum([plot_up_to, max_iter])
     end
     max_iter += 1
-    ingredients = set_up_plots(ce; alpha = alpha, plot_proba = plot_proba)
+    path_x, path_y = setup_ce_plot(ce)
 
-    for X in eachslice(ingredients.path_embedded, dims=3)
-        for (x,y) in zip(eachcol(X),ingredients.path_labels)
+    # Outer loop over number of counterfactuals:
+    for (num_counterfactual, X) in enumerate(eachslice(path_x, dims=3))
+        # Inner loop over counterfactual search steps:
+        steps = zip(eachcol(X), path_y)       
+        for (i,(x,y)) in enumerate(steps)
+            i <= max_iter || break
+            _annotate = i == length(steps) && ce.num_counterfactuals > 1
             @series begin
                 seriestype := :scatter
-                markercolor := CategoricalArrays.levelcode.(y[1])
+                markercolor := CategoricalArrays.levelcode.(y[num_counterfactual])
+                markersize := i == length(steps) ? msfinal : mspath
+                series_annotation := _annotate ? text("C$(num_counterfactual)", mspath) : nothing
                 label := :none
-                x[1,:], X[2,:]
+                x[1,:], x[2,:]
             end
         end
     end
 end
-
-# """
-#     Plots.plot(
-#         ce::CounterfactualExplanation;
-#         alpha_ = 0.5,
-#         plot_up_to::Union{Nothing,Int} = nothing,
-#         plot_proba::Bool = false,
-#         kwargs...,
-#     )
-
-# Calling `plot` on an instance of type `CounterfactualExplanation` returns a plot that visualises the entire counterfactual path. For multi-dimensional input data, the data is first compressed into two dimensions. The decision boundary is then approximated using using a Nearest Neighbour classifier. This is still somewhat experimental at the moment.
-
-
-# # Examples
-
-# ```julia-repl
-# # Search:
-# generator = GenericGenerator()
-# ce = generate_counterfactual(x, target, counterfactual_data, M, generator)
-
-# plot(ce)
-# ```
-# """
-# function Plots.plot(
-#     ce_plot::CounterfactualExplanation;
-#     alpha_ = 0.5,
-#     plot_up_to::Union{Nothing,Int} = nothing,
-#     plot_proba::Bool = false,
-#     n_points = 1000,
-#     kwargs...,
-# )
-
-#     ce = deepcopy(ce_plot)
-#     ce.data = DataPreprocessing.subsample(ce.data, n_points)
-
-#     max_iter = total_steps(ce)
-#     max_iter = if isnothing(plot_up_to)
-#         total_steps(ce)
-#     else
-#         minimum([plot_up_to, max_iter])
-#     end
-#     max_iter += 1
-#     ingredients = set_up_plots(ce; alpha = alpha_, plot_proba = plot_proba, kwargs...)
-
-#     for t = 1:max_iter
-#         final_state = t == max_iter
-#         plot_state(ce, t, final_state; ingredients...)
-#     end
-
-#     plt = if plot_proba
-#         Plots.plot(ingredients.p1, ingredients.p2; kwargs...)
-#     else
-#         Plots.plot(ingredients.p1; kwargs...)
-#     end
-
-#     return plt
-# end
 
 """
     animate_path(ce::CounterfactualExplanation, path=tempdir(); plot_proba::Bool=false, kwargs...)
@@ -242,31 +193,14 @@ Base.@kwdef struct PlotIngredients
 end
 
 """
-    set_up_plots(
-        ce::CounterfactualExplanation;
-        alpha,
-        plot_proba,
-        kwargs...
-    )
+    setup_ce_plot(ce::CounterfactualExplanation)
 
 A helper method that prepares data for plotting.
 """
-function set_up_plots(ce::CounterfactualExplanation; alpha, plot_proba, kwargs...)
-    # p1 = plot(ce.M, ce.data; target = ce.target, alpha = alpha, kwargs...)
-    # p2 = plot(; xlims = (1, total_steps(ce) + 1), ylims = (0, 1))
+function setup_ce_plot(ce::CounterfactualExplanation)
     path_embedded = embed_path(ce)
     path_labels = CounterfactualExplanations.counterfactual_label_path(ce)
     y_levels = ce.data.y_levels
-    path_labels = map(x -> CategoricalArrays.categorical(x; levels = y_levels), path_labels)
-    path_probs = CounterfactualExplanations.target_probs_path(ce)
-    output = (
-        # p1 = p1,
-        # p2 = p2,
-        path_embedded = path_embedded,
-        path_labels = path_labels,
-        path_probs = path_probs,
-        alpha = alpha,
-        plot_proba = plot_proba,
-    )
-    return output
+    path_labels = map(x -> CategoricalArrays.categorical(x; levels=y_levels), path_labels)
+    return path_embedded, path_labels
 end
