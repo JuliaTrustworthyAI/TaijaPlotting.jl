@@ -13,9 +13,15 @@ using NearestNeighborModels: KNNClassifier
     loss_fun=nothing,
 )
 
+    # Asserts
+    @assert !plot_loss || !isnothing(loss_fun) "Need to provide a loss function to plot the loss, e.g. (`loss_fun=Flux.Losses.logitcrossentropy`)."
+
     # Get user-defined arguments:
     xlims = get(plotattributes, :xlims, nothing)
     ylims = get(plotattributes, :ylims, nothing)
+
+    # Plot attributes
+    linewidth --> 0.1
 
     X, _ = DataPreprocessing.unpack_data(data)
     ŷ = probs(M, X) # true predictions
@@ -50,6 +56,9 @@ using NearestNeighborModels: KNNClassifier
     x_range = convert.(eltype(X), range(xlims[1]; stop=xlims[2], length=length_out))
     y_range = convert.(eltype(X), range(ylims[1]; stop=ylims[2], length=length_out))
 
+    xlims --> xlims
+    ylims --> ylims
+
     plot_loss = plot_loss || !isnothing(loss_fun)
 
     if plot_loss
@@ -82,18 +91,21 @@ using NearestNeighborModels: KNNClassifier
     target_idx = get_target_index(data.y_levels, target)
     z = plot_loss ? Z[1, :] : Z[target_idx, :]
 
+    # Contour plot:
     @series begin
         seriestype := :contourf
-        colorbar := :none
         x_range, y_range, z
     end
 
-    _c = Int.(y.refs)
-    @series begin
-        seriestype := :scatter
-        group := y
-        markercolor := _c
-        X[:,1], X[:,2]
+    # Scatter plot:
+    for (i, x) in enumerate(unique(sort(y)))
+        @series begin
+            seriestype := :scatter
+            markercolor := i
+            group_idx = findall(y .== x)
+            label --> "$(x)"
+            X[group_idx, 1], X[group_idx, 2]
+        end
     end
     
 end
