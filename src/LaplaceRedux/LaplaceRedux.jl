@@ -78,7 +78,6 @@ using Trapz
                 seriestype := :scatter
                 markercolor := i
                 group_idx = findall(y .== x)
-                println(group_idx)
                 label --> "$(x)"
                 X[1, group_idx], X[2, group_idx]
             end
