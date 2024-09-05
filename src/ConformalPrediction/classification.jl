@@ -90,9 +90,9 @@ In the case of univariate inputs or higher dimensional inputs, a stacked area pl
         # Predictions:
         ŷ = MLJBase.predict(conf_model, fitresult, Xraw)
         nout = length(levels(y))
-        ŷ = (_y -> reduce(hcat, _y))(map(
-            _y -> ismissing(_y) ? [0 for i in 1:nout] : pdf.(_y, levels(y)), ŷ
-        ))
+        ŷ = (_y -> reduce(hcat, _y))(
+            map(_y -> ismissing(_y) ? [0 for i in 1:nout] : pdf.(_y, levels(y)), ŷ)
+        )
         ŷ = permutedims(ŷ)
         println(x)
         println(ŷ[sortperm(x), :])
