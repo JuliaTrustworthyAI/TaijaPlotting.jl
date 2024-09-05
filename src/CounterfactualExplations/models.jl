@@ -19,12 +19,12 @@ Calling `Plots.plot` on a `AbstractFittedModel` will plot the model's prediction
 @recipe function plot(
     M::AbstractFittedModel,
     data::CounterfactualData;
-    target = nothing,
-    length_out = 100,
-    zoom = -0.1,
-    dim_red = :pca,
-    plot_loss = false,
-    loss_fun = nothing,
+    target=nothing,
+    length_out=100,
+    zoom=-0.1,
+    dim_red=:pca,
+    plot_loss=false,
+    loss_fun=nothing,
 )
 
     # Asserts
@@ -38,16 +38,7 @@ Calling `Plots.plot` on a `AbstractFittedModel` will plot the model's prediction
     linewidth --> 0.1
 
     contour_series, X, y, xlims, ylims = setup_model_plot(
-        M,
-        data,
-        target,
-        length_out,
-        zoom,
-        dim_red,
-        plot_loss,
-        loss_fun,
-        xlims,
-        ylims,
+        M, data, target, length_out, zoom, dim_red, plot_loss, loss_fun, xlims, ylims
     )
 
     xlims --> xlims
@@ -69,7 +60,6 @@ Calling `Plots.plot` on a `AbstractFittedModel` will plot the model's prediction
             X[group_idx, 1], X[group_idx, 2]
         end
     end
-
 end
 
 function setup_model_plot(
@@ -99,7 +89,7 @@ function setup_model_plot(
     end
     target_encoded = data.output_encoder(target)
 
-    X, y, multi_dim = prepare_for_plotting(data; dim_red = dim_red)
+    X, y, multi_dim = prepare_for_plotting(data; dim_red=dim_red)
 
     # Surface range:
     zoom = zoom * maximum(abs.(X))
@@ -114,8 +104,8 @@ function setup_model_plot(
     else
         ylims = ylims .+ (zoom, -zoom)
     end
-    x_range = convert.(eltype(X), range(xlims[1]; stop = xlims[2], length = length_out))
-    y_range = convert.(eltype(X), range(ylims[1]; stop = ylims[2], length = length_out))
+    x_range = convert.(eltype(X), range(xlims[1]; stop=xlims[2], length=length_out))
+    y_range = convert.(eltype(X), range(ylims[1]; stop=ylims[2], length=length_out))
 
     plot_loss = plot_loss || !isnothing(loss_fun)
 
@@ -158,7 +148,7 @@ function setup_model_plot(
 end
 
 function voronoi(X::AbstractMatrix, y::AbstractVector)
-    knnc = KNNClassifier(; K = 1) # KNNClassifier instantiation
+    knnc = KNNClassifier(; K=1) # KNNClassifier instantiation
     X = MLJBase.table(X)
     y = CategoricalArrays.categorical(y)
     knnc_mach = MLJBase.machine(knnc, X, y)

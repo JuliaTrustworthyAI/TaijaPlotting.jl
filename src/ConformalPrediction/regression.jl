@@ -56,11 +56,9 @@ A `Plots.jl` recipe that can be used to visualize the conformal predictions of a
         label := train_lab
         vec(x), vec(y)
     end
-
 end
 
 function setup_ci(X, y, input_var, xlims, ylims, zoom)
-
     Xraw = deepcopy(X)
     _names = get_names(Xraw)
     X = permutedims(MLJBase.matrix(X))
