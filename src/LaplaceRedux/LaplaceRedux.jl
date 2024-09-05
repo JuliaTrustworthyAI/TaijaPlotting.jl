@@ -38,11 +38,10 @@ Calling `Plots.plot` on a `Laplace` object will plot the posterior predictive di
 
     # Plot attributes
     lw = get(plotattributes, :linewidth, 1)
-    lw_yhat = lw*2
-    lw_contour = lw*0.1
+    lw_yhat = lw * 2
+    lw_contour = lw * 0.1
 
     if la.likelihood == :regression
-
         xrange, yrange, xlims, ylims = surface_range(X, y, xlims, ylims, zoom, length_out)
         xlims := xlims
         ylims := ylims
@@ -66,11 +65,9 @@ Calling `Plots.plot` on a `Laplace` object will plot the posterior predictive di
             label --> "ytrain"
             vec(X), vec(y)
         end
-
     end
 
     if la.likelihood == :classification
-
         xrange, yrange, xlims, ylims = surface_range(X, xlims, ylims, zoom, length_out)
         xlims := xlims
         ylims := ylims
@@ -95,15 +92,10 @@ Calling `Plots.plot` on a `Laplace` object will plot the posterior predictive di
                 X[1, group_idx], X[2, group_idx]
             end
         end
-
     end
-
 end
 
-function surface_range(
-    X::AbstractArray, y::AbstractArray,
-    xlims,ylims,zoom,length_out,
-)
+function surface_range(X::AbstractArray, y::AbstractArray, xlims, ylims, zoom, length_out)
 
     # Surface range:
     if isnothing(xlims)
@@ -116,14 +108,12 @@ function surface_range(
     else
         ylims = ylims .+ (zoom, -zoom)
     end
-    x_range = range(xlims[1]; stop = xlims[2], length = length_out)
-    y_range = range(ylims[1]; stop = ylims[2], length = length_out)
+    x_range = range(xlims[1]; stop=xlims[2], length=length_out)
+    y_range = range(ylims[1]; stop=ylims[2], length=length_out)
     return x_range, y_range, xlims, ylims
-
 end
 
-function surface_range(X::AbstractArray,xlims,ylims,zoom,length_out)
-
+function surface_range(X::AbstractArray, xlims, ylims, zoom, length_out)
     if isnothing(xlims)
         xlims = (minimum(X[1, :]), maximum(X[1, :])) .+ (zoom, -zoom)
     else
@@ -134,16 +124,15 @@ function surface_range(X::AbstractArray,xlims,ylims,zoom,length_out)
     else
         ylims = ylims .+ (zoom, -zoom)
     end
-    x_range = range(xlims[1]; stop = xlims[2], length = length_out)
-    y_range = range(ylims[1]; stop = ylims[2], length = length_out)
+    x_range = range(xlims[1]; stop=xlims[2], length=length_out)
+    y_range = range(ylims[1]; stop=ylims[2], length=length_out)
 
     return x_range, y_range, xlims, ylims
 end
 
 function get_contour(la::Laplace, x_range, y_range, link_approx, target, title)
-
     predict_ = function (la, X::AbstractVector)
-        z = LaplaceRedux.predict(la, X; link_approx = link_approx)
+        z = LaplaceRedux.predict(la, X; link_approx=link_approx)
         if LaplaceRedux.outdim(la) == 1 # binary
             z = [1.0 - z[1], z[1]]
         end
@@ -178,34 +167,33 @@ The intervals are taken in step of 0.05 quantiles.
 - `samp_distr` -- an array of sampled distributions F(x_t) corresponding to the y_t stacked column-wise.
 - `n_bins` -- numbers of bins to use.
 """
-function calibration_plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
-    quantiles = collect(range(0; stop = 1, length = n_bins + 1))
+function calibration_plot(la::Laplace, y_cal, samp_distr; n_bins=20)
+    quantiles = collect(range(0; stop=1, length=n_bins + 1))
     # Create a new plot object
     p = plot()
-    plot!([0, 1], [0, 1], label = "Perfect calibration", linestyle = :dash, color = :black)
+    plot!([0, 1], [0, 1]; label="Perfect calibration", linestyle=:dash, color=:black)
     # Compute the empirical frequency
     if la.likelihood == :regression
         emp_freq = empirical_frequency_regression(y_cal, samp_distr; n_bins)
-        plot!(p, quantiles, emp_freq, color = :blue, label = "neural network")
+        plot!(p, quantiles, emp_freq; color=:blue, label="neural network")
         plot!(
             p,
             quantiles,
-            emp_freq,
-            fillrange = quantiles,
-            color = :lightblue,
-            label = "miscalibration area",
+            emp_freq;
+            fillrange=quantiles,
+            color=:lightblue,
+            label="miscalibration area",
         )
         # Calculate the area between the curve and the diagonal
         area = trapz((quantiles), vec(abs.(emp_freq - quantiles)))
         annotate!(
-            0.75,
-            0.05,
-            ("Miscalibration area = $(round(area, digits=2))", 8, 11, :bottom),
+            0.75, 0.05, ("Miscalibration area = $(round(area, digits=2))", 8, 11, :bottom)
         )
     elseif la.likelihood == :classification
-        num_p_per_interval, emp_freq, bin_centers =
-            empirical_frequency_binary_classification(y_cal, samp_distr; n_bins)
-        plot!(bin_centers, emp_freq, label = "Observed average", lw = 2)
+        num_p_per_interval, emp_freq, bin_centers = empirical_frequency_binary_classification(
+            y_cal, samp_distr; n_bins
+        )
+        plot!(bin_centers, emp_freq; label="Observed average", lw=2)
     end
 
     # Add labels and title
@@ -216,5 +204,5 @@ function calibration_plot(la::Laplace, y_cal, samp_distr; n_bins = 20)
     ylims!(0, 1)
 
     # Show the plot
-    display(p)
+    return display(p)
 end

@@ -90,20 +90,21 @@ In the case of univariate inputs or higher dimensional inputs, a stacked area pl
         # Predictions:
         ŷ = MLJBase.predict(conf_model, fitresult, Xraw)
         nout = length(levels(y))
-        ŷ =
-            map(_y -> ismissing(_y) ? [0 for i = 1:nout] : pdf.(_y, levels(y)), ŷ) |> _y -> reduce(hcat, _y)
+        ŷ = (_y -> reduce(hcat, _y))(map(
+            _y -> ismissing(_y) ? [0 for i in 1:nout] : pdf.(_y, levels(y)), ŷ
+        ))
         ŷ = permutedims(ŷ)
         println(x)
         println(ŷ[sortperm(x), :])
 
         # Area chart
         args = (x, ŷ)
-        data = cumsum(args[end], dims=2)
+        data = cumsum(args[end]; dims=2)
         x = length(args) == 1 ? (axes(data, 1)) : args[1]
         seriestype := :line
         for i in axes(data, 2)
             @series begin
-                fillrange := i > 1 ? data[:, i-1] : 0
+                fillrange := i > 1 ? data[:, i - 1] : 0
                 x, data[:, i]
             end
         end
@@ -114,8 +115,21 @@ In the case of univariate inputs or higher dimensional inputs, a stacked area pl
 
         # Setup:
         x1, x2, x1range, x2range, Z, xlims, ylims, _default_title = setup_contour_cp(
-            conf_model, fitresult, X, y, xlims, ylims, zoom, ntest, target,
-            plot_set_size, plot_classification_loss, plot_set_loss, temp, κ, loss_matrix,
+            conf_model,
+            fitresult,
+            X,
+            y,
+            xlims,
+            ylims,
+            zoom,
+            ntest,
+            target,
+            plot_set_size,
+            plot_classification_loss,
+            plot_set_loss,
+            temp,
+            κ,
+            loss_matrix,
         )
 
         # Contour:
@@ -136,13 +150,19 @@ In the case of univariate inputs or higher dimensional inputs, a stacked area pl
                 x1[group_idx], x2[group_idx]
             end
         end
-
     end
-
 end
 
 function setup_contour_cp(
-    conf_model, fitresult, X, y, xlims, ylims, zoom, ntest, target,
+    conf_model,
+    fitresult,
+    X,
+    y,
+    xlims,
+    ylims,
+    zoom,
+    ntest,
+    target,
     plot_set_size,
     plot_classification_loss,
     plot_set_loss,
@@ -201,23 +221,14 @@ function setup_contour_cp(
         elseif plot_classification_loss
             _target = categorical([target]; levels=levels(y))
             z = ConformalPrediction.ConformalTraining.classification_loss(
-                conf_model,
-                fitresult,
-                [x1 x2],
-                _target;
-                temp=temp,
-                loss_matrix=loss_matrix,
+                conf_model, fitresult, [x1 x2], _target; temp=temp, loss_matrix=loss_matrix
             )
         elseif plot_set_loss
             z = ConformalPrediction.ConformalTraining.smooth_size_loss(
-                conf_model,
-                fitresult,
-                [x1 x2];
-                κ=κ,
-                temp=temp,
+                conf_model, fitresult, [x1 x2]; κ=κ, temp=temp
             )
         else
-            z = ismissing(p̂) ? [missing for i = 1:length(levels(y))] : pdf.(p̂, levels(y))
+            z = ismissing(p̂) ? [missing for i in 1:length(levels(y))] : pdf.(p̂, levels(y))
             z = replace(z, 0 => missing)
         end
         push!(Z, z)
