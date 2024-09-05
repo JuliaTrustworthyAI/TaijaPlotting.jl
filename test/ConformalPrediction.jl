@@ -21,9 +21,9 @@ isplot(plt) = typeof(plt) <: Plots.Plot
         fit!(mach, rows = train)
 
         @test isplot(bar(mach.model, mach.fitresult, X))
-        @test isplot(areaplot(mach.model, mach.fitresult, X, y))
-        @test isplot(areaplot(mach.model, mach.fitresult, X, y; input_var = 1))
-        @test isplot(areaplot(mach.model, mach.fitresult, X, y; input_var = :x1))
+        @test isplot(plot(mach.model, mach.fitresult, X, y))
+        @test isplot(plot(mach.model, mach.fitresult, X, y; input_var = 1))
+        @test isplot(plot(mach.model, mach.fitresult, X, y; input_var = :x1))
         @test isplot(contourf(mach.model, mach.fitresult, X, y))
         @test isplot(
             contourf(mach.model, mach.fitresult, X, y; zoom = -1, plot_set_size = true),

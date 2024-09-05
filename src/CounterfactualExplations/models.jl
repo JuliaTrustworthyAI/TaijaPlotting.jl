@@ -2,28 +2,92 @@ using DataAPI
 using Distributions: pdf
 using NearestNeighborModels: KNNClassifier
 
-function Plots.plot(
+"""
+    function plot(
+        M::AbstractFittedModel,
+        data::CounterfactualData;
+        target = nothing,
+        length_out = 100,
+        zoom = -0.1,
+        dim_red = :pca,
+        plot_loss = false,
+        loss_fun = nothing,
+    )
+
+Calling `Plots.plot` on a `AbstractFittedModel` will plot the model's predictions as a contour. The `target` argument can be used to plot the predictions for a specific target variable. The `length_out` argument can be used to control the number of points used to plot the contour. The `zoom` argument can be used to control the zoom of the plot. The `dim_red` argument can be used to control the method used to reduce the dimensionality of the data if it has more than two features. 
+"""
+@recipe function plot(
     M::AbstractFittedModel,
-    data::DataPreprocessing.CounterfactualData;
-    target::Union{Nothing,RawTargetType} = nothing,
-    colorbar = true,
-    title = "",
+    data::CounterfactualData;
+    target = nothing,
     length_out = 100,
     zoom = -0.1,
-    xlims = nothing,
-    ylims = nothing,
-    linewidth = 0.1,
-    alpha = 1.0,
-    contour_alpha = 1.0,
-    dim_red::Symbol = :pca,
-    plot_loss::Bool = false,
-    loss_fun::Union{Nothing,Function} = nothing,
-    kwargs...,
+    dim_red = :pca,
+    plot_loss = false,
+    loss_fun = nothing,
+)
+
+    # Asserts
+    @assert !plot_loss || !isnothing(loss_fun) "Need to provide a loss function to plot the loss, e.g. (`loss_fun=Flux.Losses.logitcrossentropy`)."
+
+    # Get user-defined arguments:
+    xlims = get(plotattributes, :xlims, nothing)
+    ylims = get(plotattributes, :ylims, nothing)
+
+    # Plot attributes
+    linewidth --> 0.1
+
+    contour_series, X, y, xlims, ylims = setup_model_plot(
+        M,
+        data,
+        target,
+        length_out,
+        zoom,
+        dim_red,
+        plot_loss,
+        loss_fun,
+        xlims,
+        ylims,
+    )
+
+    xlims --> xlims
+    ylims --> ylims
+
+    # Contour plot:
+    @series begin
+        seriestype := :contourf
+        contour_series[1], contour_series[2], contour_series[3]
+    end
+
+    # Scatter plot:
+    for (i, x) in enumerate(unique(sort(y)))
+        @series begin
+            seriestype := :scatter
+            markercolor := i
+            group_idx = findall(y .== x)
+            label --> "$(x)"
+            X[group_idx, 1], X[group_idx, 2]
+        end
+    end
+
+end
+
+function setup_model_plot(
+    M::AbstractFittedModel,
+    data::CounterfactualData,
+    target,
+    length_out,
+    zoom,
+    dim_red,
+    plot_loss,
+    loss_fun,
+    xlims,
+    ylims,
 )
     X, _ = DataPreprocessing.unpack_data(data)
     ŷ = probs(M, X) # true predictions
     if size(ŷ, 1) > 1
-        ŷ = vec(Flux.onecold(ŷ, 1:size(ŷ, 1)))
+        ŷ = vec(OneHotArrays.onecold(ŷ, 1:size(ŷ, 1)))
     else
         ŷ = vec(ŷ)
     end
@@ -44,6 +108,7 @@ function Plots.plot(
     else
         xlims = xlims .+ (zoom, -zoom)
     end
+
     if isnothing(ylims)
         ylims = (minimum(X[:, 2]), maximum(X[:, 2])) .+ (zoom, -zoom)
     else
@@ -54,9 +119,11 @@ function Plots.plot(
 
     plot_loss = plot_loss || !isnothing(loss_fun)
 
-    if plot_loss 
+    if plot_loss
         # Loss surface:
-        Z = [loss_fun(logits(M, [x, y][:, :]), target_encoded) for x in x_range, y in y_range]
+        Z = [
+            loss_fun(logits(M, [x, y][:, :]), target_encoded) for x in x_range, y in y_range
+        ]
     else
         # Prediction surface:
         if multi_dim
@@ -84,22 +151,10 @@ function Plots.plot(
     target_idx = get_target_index(data.y_levels, target)
     z = plot_loss ? Z[1, :] : Z[target_idx, :]
 
-    # Contour:
-    Plots.contourf(
-        x_range,
-        y_range,
-        z;
-        colorbar = colorbar,
-        title = title,
-        linewidth = linewidth,
-        xlims = xlims,
-        ylims = ylims,
-        kwargs...,
-        alpha = contour_alpha,
-    )
+    # Collect:
+    contour_series = (x_range, y_range, z)
 
-    # Samples:
-    return Plots.scatter!(data; dim_red = dim_red, alpha = alpha, kwargs...)
+    return contour_series, X, y, xlims, ylims
 end
 
 function voronoi(X::AbstractMatrix, y::AbstractVector)

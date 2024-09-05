@@ -12,9 +12,9 @@ function embed(data::CounterfactualData, X::AbstractArray = nothing; dim_red::Sy
         else
             @info "Training model to compress data."
             if dim_red == :pca
-                tfn = MultivariateStats.fit(PCA, X_train; maxoutdim=2)
+                tfn = MultivariateStats.fit(PCA, X_train; maxoutdim = 2)
             elseif dim_red == :tsne
-                tfn = MultivariateStats.fit(TSNE, X_train; maxoutdim=2)
+                tfn = MultivariateStats.fit(TSNE, X_train; maxoutdim = 2)
             end
             data.input_encoder = nothing
             X = isnothing(X) ? X_train : X
@@ -22,7 +22,7 @@ function embed(data::CounterfactualData, X::AbstractArray = nothing; dim_red::Sy
     end
 
     # Transforming:
-    X = typeof(X) <: Vector{<:Matrix} ? MLUtils.stack(X, dims=2) : X
+    X = typeof(X) <: Vector{<:Matrix} ? MLUtils.stack(X, dims = 2) : X
     if !isnothing(tfn) && !isnothing(X)
         X = mapslices(x -> MultivariateStats.predict(tfn, x), X, dims = 1)
     else
@@ -53,8 +53,24 @@ function prepare_for_plotting(data::CounterfactualData; dim_red::Symbol = :pca)
     return X', y, multi_dim
 end
 
-function Plots.scatter!(data::CounterfactualData; dim_red::Symbol = :pca, kwargs...)
+"""
+    plot(data::CounterfactualData; dim_red = :pca)
+
+Calling `Plots.plot` on a `data::CounterfactualData` object will generate a scatter plot of the data.
+"""
+@recipe function plot(data::CounterfactualData; dim_red = :pca)
+
+    # Set up:
     X, y, _ = prepare_for_plotting(data; dim_red = dim_red)
-    _c = Int.(y.refs)
-    return Plots.scatter!(X[:, 1], X[:, 2]; group = y, colour = _c, kwargs...)
+
+    # Scatter plot:
+    for (i, x) in enumerate(unique(sort(y)))
+        @series begin
+            seriestype := :scatter
+            markercolor := i
+            group_idx = findall(y .== x)
+            label --> "$(x)"
+            X[group_idx, 1], X[group_idx, 2]
+        end
+    end
 end
