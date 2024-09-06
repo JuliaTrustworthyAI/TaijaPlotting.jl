@@ -6,7 +6,6 @@ using Plots
 using TaijaData
 
 @testset "LaplaceRedux.jl" begin
-
     @testset "Regression" begin
         # Data:
         x, y = toy_data_regression()
@@ -22,7 +21,7 @@ using TaijaData
         nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, 1))
 
         # Fit:
-        la = LaplaceRedux.Laplace(nn; likelihood = :regression)
+        la = LaplaceRedux.Laplace(nn; likelihood=:regression)
         LaplaceRedux.fit!(la, data)
 
         plot(la, X, y)
@@ -30,7 +29,6 @@ using TaijaData
     end
 
     @testset "Classification" begin
-
         @testset "Single class" begin
             # Data:
             x, y = TaijaData.load_linearly_separable()
@@ -43,19 +41,19 @@ using TaijaData
             nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, 1, σ))
 
             # Fit:
-            la = LaplaceRedux.Laplace(nn; likelihood = :classification)
+            la = LaplaceRedux.Laplace(nn; likelihood=:classification)
             LaplaceRedux.fit!(la, data)
 
             # Very minimal testing for basic functionality:
             plot(la, x, y)
-            plot(la, x, y; zoom = -0.1f32)
+            plot(la, x, y; zoom=-0.1f32)
             @test true
         end
 
         @testset "Multi-class" begin
             # Data:
             nout = 4
-            x, y = TaijaData.load_blobs(centers = nout)
+            x, y = TaijaData.load_blobs(; centers=nout)
             x = Float32.(x)
             y = onehotbatch(y, 1:nout)
             data = zip(eachcol(x), eachcol(y))
@@ -66,15 +64,14 @@ using TaijaData
             nn = Chain(Dense(D, n_hidden, tanh), Dense(n_hidden, nout, σ))
 
             # Fit:
-            la = LaplaceRedux.Laplace(nn; likelihood = :classification)
+            la = LaplaceRedux.Laplace(nn; likelihood=:classification)
             LaplaceRedux.fit!(la, data)
 
             # Very minimal testing for basic functionality:
             y = onecold(y)
             plot(la, x, y)
-            plot(la, x, y; zoom = -0.1f32)
+            plot(la, x, y; zoom=-0.1f32)
             @test true
         end
     end
-
 end
